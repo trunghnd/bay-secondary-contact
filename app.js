@@ -1,10 +1,6 @@
 const axios = require('axios')
 const { auth } = require('./classes/auth.js')
 const base = 'https://api.hubapi.com'
-const token = 'pat-na1-bea4de26-ca6f-4265-9e87-4487e39e8697'
-const config = {
-  headers: { Authorization: `Bearer ${token}` }
-}
 
 const delay = time => new Promise(res=>setTimeout(res,time))
 
