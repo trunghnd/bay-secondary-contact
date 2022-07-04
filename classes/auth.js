@@ -13,7 +13,7 @@ let Auth = class {
         this.cache = new NodeCache();
     }
 
-    login(code) {
+    async login(code) {
         let data = {}
         data.grant_type = 'authorization_code'
         data.code = code
@@ -29,7 +29,7 @@ let Auth = class {
         let promise = axios.post(urlLogin, queryString, {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8' }
         })
-        promise
+        return promise
             .then(response => {
                 //save refresh token and access token
                 this.setAccessToken(response.data.access_token)
