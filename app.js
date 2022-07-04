@@ -87,12 +87,14 @@ async function getSecondaryContactId(contactId,ownerId){
           lastname: contactProperties.lastname,
           phone: contactProperties.phone,
           hubspot_owner_id: ownerId,
-          primary_contact_id: contactId
+          primary_contact_id: contactId,
+          agent_private_contact:true
+
       }
     }
     let resCreateSecondaryContact = await axios.post(urlSecondaryContact,dataSecondaryContact,config)
     secondaryContactId = resCreateSecondaryContact.data.id
-    await delay(10000) //wait 10 sec for hs to fully update
+    //await delay(10000) //wait 10 sec for hs to fully update
 
     // //associate MyAgentContact to Contact
     // let urlCreateAssociation = base + '/crm/v3/objects/'+myAgentContact+'/'+myAgentContactId+'/associations/contact/'+contactId+'/my_agent_contact_to_contact'

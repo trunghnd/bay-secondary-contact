@@ -1,4 +1,5 @@
 //this is a Node Express server
+//bay-secondary-contact-4m6xe.ondigitalocean.app
 const express = require('express')
 const bodyParser = require('body-parser')
 const logger = require('morgan')
@@ -9,6 +10,7 @@ require('dotenv').config();
 const {processEngagements,getSecondaryContactId} = require('./app.js')
 const { auth } = require('./classes/auth.js')
 const { Owner } = require('./classes/owner.js')
+const { Contact } = require('./classes/contact.js')
 
 const serverUrl = process.env.SERVER_URL
 
@@ -64,17 +66,22 @@ router.get('/make-secondary-contact', (req, res) => {
 })
 
 
-router.get('/card-data', (req, res) => {
+router.get('/card-data', async (req, res) => {
 
   let query = req.query
-  let data = {
-    "primaryAction": {
-      "type": "IFRAME",
-      "width": 890,
-      "height": 748,
-      "uri": `${serverUrl}/card-view1?userid=${query.userId}&contactid=${query.hs_object_id}&firstname=${query.firstname}&lastname=${query.lastname}&email=${query.email}&portalid=${query.portalId}`,
-      "label": "Clone contact"
-
+  let contact = new Contact()
+  await contact.load(query.hs_object_id)
+  console.log(contact)
+  let data = {}
+  if(!contact.data.agent_private_contact){
+    data = {
+      "primaryAction": {
+        "type": "IFRAME",
+        "width": 890,
+        "height": 748,
+        "uri": `${serverUrl}/card-view1?userid=${query.userId}&contactid=${query.hs_object_id}&firstname=${query.firstname}&lastname=${query.lastname}&email=${query.email}&portalid=${query.portalId}`,
+        "label": "Create private view"
+      }
     }
   }
   res.json(data)
