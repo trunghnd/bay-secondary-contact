@@ -74,12 +74,13 @@ router.get('/card-data', async (req, res) => {
   console.log(contact)
   let data = {}
   if(!contact.data.agent_private_contact){
+
     data = {
       "primaryAction": {
         "type": "IFRAME",
         "width": 890,
         "height": 748,
-        "uri": `${serverUrl}/card-view1?userid=${query.userId}&contactid=${query.hs_object_id}&firstname=${query.firstname}&lastname=${query.lastname}&email=${query.email}&portalid=${query.portalId}`,
+        "uri": `${serverUrl}/card-view1?userid=${query.userId}&contactid=${query.hs_object_id}&firstname=${encodeURIComponent(query.firstname)}&lastname=${encodeURIComponent(query.lastname)}&email=${encodeURIComponent(query.email)}&portalid=${query.portalId}`,
         "label": "Create private view"
       }
     }
