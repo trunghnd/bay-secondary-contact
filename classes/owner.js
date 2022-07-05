@@ -18,12 +18,45 @@ let Owner = class {
     }
 
     async loadByUserId(userId) {
-
         let config = await auth.getConfig()
         let urlOwnerIDs = base + '/crm/v3/owners/' + userId + '?idProperty=userId'
         let res = await axios.get(urlOwnerIDs, config)
         this.data = res.data
     }
+    async getPrivateContact(originalContactId) {
+        let config = await auth.getConfig()
+
+        let secondaryContactId
+        let urlSsearch = base + '/crm/v3/objects/contacts/search'
+        let data = {
+            "filterGroups": [
+                {
+                    "filters": [
+                        {
+                            "propertyName": "hubspot_owner_id",
+                            "operator": "EQ",
+                            "value": this.data.id
+                        },
+                        {
+                            "propertyName": "primary_contact_id",
+                            "operator": "EQ",
+                            "value": originalContactId
+                        }
+                    ]
+                }
+            ]
+        }
+        let resSearch = await axios.post(urlSsearch, data, config)
+        if (resSearch.data.total == 0) { //create new secondary Contact for owner when not found
+
+            return false
+
+        } else {
+            return resSearch.data.results[0].id
+        }
+    }
+
+
 
 
 }

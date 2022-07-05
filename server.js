@@ -7,7 +7,7 @@ const cors = require('cors')
 require('dotenv').config();
 
 
-const {processEngagements,getSecondaryContactId} = require('./app.js')
+const { processEngagements, getSecondaryContactId } = require('./app.js')
 const { auth } = require('./classes/auth.js')
 const { Owner } = require('./classes/owner.js')
 const { Contact } = require('./classes/contact.js')
@@ -37,43 +37,54 @@ router.get('/card-view1', async (req, res) => {
   let query = req.query
   let owner = new Owner()
   await owner.loadByUserId(query.userid)
-  console.log(owner)
-  res.render("view1", {
-    firstname: query.firstname,
-    lastname: query.lastname,
-    email: query.email,
-    contactid: query.contactid,
-    ownerid: owner.data.id,
-    portalid: query.portalid,
-    serverUrl:serverUrl
+  let privateContactId = await owner.getPrivateContact(query.contactid)
+  if (!privateContactId) {
+    res.render("view1", {
+      firstname: query.firstname,
+      lastname: query.lastname,
+      email: query.email,
+      contactid: query.contactid,
+      ownerid: owner.data.id,
+      portalid: query.portalid,
+      serverUrl: serverUrl
+    })
 
-  })
+  } else {
+    res.render("view2", {
+      contactid: privateContactId,
+      portalid: query.portalid,
+      message: `Private view of contact (${query.firstname} ${query.lastname}) already exists`
+    })
+  }
+
 })
 
 router.get('/make-secondary-contact', (req, res) => {
   let query = req.query
-  getSecondaryContactId(query.contactid,query.ownerid)
-  .then(id =>{
-    res.render("view2", {
+  getSecondaryContactId(query.contactid, query.ownerid)
+    .then(id => {
+      res.render("view2", {
         contactid: id,
-        portalid:query.portalid
+        portalid: query.portalid,
+        message: 'Private view of contact is successfully created'
+      })
     })
-  })
-  .catch((error)=>{
+    .catch((error) => {
       console.log(error)
       return res.send('Oops')
-  })
+    })
 })
 
 
 router.get('/card-data', async (req, res) => {
+  console.log('Hi')
 
   let query = req.query
   let contact = new Contact()
   await contact.load(query.hs_object_id)
   console.log(contact)
   let data = {}
-  if(!contact.data.agent_private_contact){
+  if (!contact.data.agent_private_contact) {
 
     data = {
       "primaryAction": {
