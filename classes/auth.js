@@ -1,5 +1,6 @@
 const axios = require('axios')
-const NodeCache = require( "node-cache" );
+const NodeCache = require('node-cache')
+const crypto = require('crypto')
 require('dotenv').config();
 
 console.log('Auth class')
@@ -8,6 +9,7 @@ let Auth = class {
     clientSecret = process.env.CLIENT_SECRET
     redirectUrl = process.env.REDIRECT_URL
     refreshToken = process.env.REFRESH_TOKEN
+    serverUrl = process.env.SERVER_URL
 
     constructor() {
         this.cache = new NodeCache();
@@ -43,22 +45,22 @@ let Auth = class {
             })
     }
 
-    async getAccessToken(){
+    async getAccessToken() {
         //check cache
-        let accessToken = this.cache.get( 'token' )
-        if ( accessToken == undefined ){
+        let accessToken = this.cache.get('token')
+        if (accessToken == undefined) {
             //set cache if not there
             await this.updateAccessToken()
         }
-        
+
         //get from cache
-        return this.cache.get( 'token' )
+        return this.cache.get('token')
     }
-    setAccessToken(token){
-        return this.cache.set('token', token, 1700 )
+    setAccessToken(token) {
+        return this.cache.set('token', token, 1700)
     }
 
-    async updateAccessToken(){
+    async updateAccessToken() {
         //if access token does not exist/exprie
         let data = {}
         data.grant_type = 'refresh_token'
@@ -97,7 +99,23 @@ let Auth = class {
         }
         return config
     }
+
+    async authoriseRequest(request) {
+
+        // console.log(request.headers)
+        var httpURI = this.serverUrl + request.originalUrl;
+        let bodyString = ''
+        if(Object.keys(request.body).length > 0){
+            bodyString = JSON.stringify(request.body)
+        } 
+        let sourceString = this.clientSecret + request.method + httpURI + bodyString
+
+        let hash = crypto.createHash('sha256').update(sourceString).digest('hex')
+        let signature = request.headers['x-hubspot-signature']
+
+        return hash == signature
+    }
 }
 
-exports.auth = new Auth ()
+exports.auth = new Auth()
 

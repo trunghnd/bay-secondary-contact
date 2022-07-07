@@ -20,9 +20,10 @@ let Contact = class {
     async load(id) {
 
         let config = await auth.getConfig()
-        let urlContact = base + '/crm/v3/objects/contacts/'+id+'?properties=agent_private_contact,hubspot_owner_id'
+        let urlContact = base + '/crm/v3/objects/contacts/'+id+'?properties=agent_private_contact,hubspot_owner_id,primary_contact_id,firstname,lastname'
         let res = await axios.get(urlContact, config)
         this.data = res.data.properties
+        console.log(this.data)
     }
 
 

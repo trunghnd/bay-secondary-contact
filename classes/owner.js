@@ -56,9 +56,6 @@ let Owner = class {
         }
     }
 
-
-
-
 }
 
 exports.Owner = Owner

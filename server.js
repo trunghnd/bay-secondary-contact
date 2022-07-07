@@ -37,25 +37,16 @@ router.get('/card-view1', async (req, res) => {
   let query = req.query
   let owner = new Owner()
   await owner.loadByUserId(query.userid)
-  let privateContactId = await owner.getPrivateContact(query.contactid)
-  if (!privateContactId) {
-    res.render("view1", {
-      firstname: query.firstname,
-      lastname: query.lastname,
-      email: query.email,
-      contactid: query.contactid,
-      ownerid: owner.data.id,
-      portalid: query.portalid,
-      serverUrl: serverUrl
-    })
+  res.render("view1", {
+    firstname: query.firstname,
+    lastname: query.lastname,
+    email: query.email,
+    contactid: query.contactid,
+    ownerid: owner.data.id,
+    portalid: query.portalid,
+    serverUrl: serverUrl
+  })
 
-  } else {
-    res.render("view2", {
-      contactid: privateContactId,
-      portalid: query.portalid,
-      message: `Private view of contact (${query.firstname} ${query.lastname}) already exists`
-    })
-  }
 
 })
 
@@ -77,23 +68,49 @@ router.get('/make-secondary-contact', (req, res) => {
 
 
 router.get('/card-data', async (req, res) => {
-  console.log('Hi')
+
+  await auth.authoriseRequest(req, '/card-data')
 
   let query = req.query
   let contact = new Contact()
   await contact.load(query.hs_object_id)
-  console.log(contact)
   let data = {}
   if (!contact.data.agent_private_contact) {
-
-    data = {
-      "primaryAction": {
-        "type": "IFRAME",
-        "width": 890,
-        "height": 748,
-        "uri": `${serverUrl}/card-view1?userid=${query.userId}&contactid=${query.hs_object_id}&firstname=${encodeURIComponent(query.firstname)}&lastname=${encodeURIComponent(query.lastname)}&email=${encodeURIComponent(query.email)}&portalid=${query.portalId}`,
-        "label": "Create private view"
+    let owner = new Owner()
+    await owner.loadByUserId(query.userId)
+    let privateContactId = await owner.getPrivateContact(query.hs_object_id)
+    if (!privateContactId) {
+      data = {
+        "primaryAction": {
+          "type": "IFRAME",
+          "width": 600,
+          "height": 400,
+          "uri": `${serverUrl}/card-view1?userid=${query.userId}&contactid=${query.hs_object_id}&firstname=${encodeURIComponent(query.firstname)}&lastname=${encodeURIComponent(query.lastname)}&email=${encodeURIComponent(query.email)}&portalid=${query.portalId}`,
+          "label": "Create private view"
+        }
       }
+
+    } else {
+      data = {
+        "results": [
+          {
+            "objectId": 245,
+            "title": query.firstname + ' ' + (query.lastname),
+            "link": `https://app.hubspot.com/contacts/${query.portalId}/contact/${privateContactId}`,
+          }
+        ]
+      }
+    }
+
+  }else{
+    data = {
+      "results": [
+        {
+          "objectId": 245,
+          "title": `Public contact: ${contact.data.firstname} ${contact.data.lastname}`,
+          "link": `https://app.hubspot.com/contacts/${query.portalId}/contact/${contact.data.primary_contact_id}`,
+        }
+      ]
     }
   }
   res.json(data)
