@@ -37,15 +37,26 @@ router.get('/card-view1', async (req, res) => {
   let query = req.query
   let owner = new Owner()
   await owner.loadByUserId(query.userid)
-  res.render("view1", {
-    firstname: query.firstname,
-    lastname: query.lastname,
-    email: query.email,
-    contactid: query.contactid,
-    ownerid: owner.data.id,
-    portalid: query.portalid,
-    serverUrl: serverUrl
-  })
+  let privateContactId = await owner.getPrivateContact(query.contactid)
+  if (!privateContactId) {
+    res.render("view1", {
+      firstname: query.firstname,
+      lastname: query.lastname,
+      email: query.email,
+      contactid: query.contactid,
+      ownerid: owner.data.id,
+      portalid: query.portalid,
+      serverUrl: serverUrl
+    })
+
+  } else {
+    res.render("view2", {
+      contactid: privateContactId,
+      portalid: query.portalid,
+      message: `Private view of contact (${query.firstname} ${query.lastname}) already exists`
+    })
+  }
+
 
 
 })
@@ -75,7 +86,7 @@ router.get('/card-data', async (req, res) => {
   let contact = new Contact()
   await contact.load(query.hs_object_id)
   let data = {}
-  if (!contact.data.agent_private_contact) {
+  if (contact.data.agent_private_contact != 'true') {
     let owner = new Owner()
     await owner.loadByUserId(query.userId)
     let privateContactId = await owner.getPrivateContact(query.hs_object_id)
@@ -102,7 +113,7 @@ router.get('/card-data', async (req, res) => {
       }
     }
 
-  }else{
+  } else {
     data = {
       "results": [
         {

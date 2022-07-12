@@ -47,6 +47,7 @@ let Owner = class {
             ]
         }
         let resSearch = await axios.post(urlSsearch, data, config)
+        console.log(resSearch.data)
         if (resSearch.data.total == 0) { //create new secondary Contact for owner when not found
 
             return false

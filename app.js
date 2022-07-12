@@ -84,7 +84,7 @@ async function getSecondaryContactId(contactId,ownerId){
           phone: contactProperties.phone,
           hubspot_owner_id: ownerId,
           primary_contact_id: contactId,
-          agent_private_contact:true
+          agent_private_contact:'true'
 
       }
     }
