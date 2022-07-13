@@ -7,7 +7,7 @@ const cors = require('cors')
 require('dotenv').config();
 
 
-const { processEngagements, getSecondaryContactId } = require('./app.js')
+const { reassociateEngagements, getSecondaryContactId } = require('./app.js')
 const { auth } = require('./classes/auth.js')
 const { Owner } = require('./classes/owner.js')
 const { Contact } = require('./classes/contact.js')
@@ -140,22 +140,41 @@ router.get('/login', async (req, res) => {
 
 
 //get list of companies from Hubspot with relevant properties
-// router.post('/associateEngagements', (req, res) => {
+router.post('/associateEngagements', (req, res) => {
 
-//   let data = req.body
-//   let contactId = data.vid
-//   console.log(contactId)
-//   let promise = processEngagements(contactId)
-//   promise
-//       .then(response =>{
-//         return res.json('Done')  
-//       })
-//       .catch((error)=>{
-//           console.log(error)
-//           return res.json('Oops')
-//       })
+  // let data = req.body
+  // let contactId = data.vid
+  let contactId = 101
+  console.log(contactId)
+  let promise = processEngagements(contactId)
+  promise
+      .then(response =>{
+        return res.json('Done')  
+      })
+      .catch((error)=>{
+          console.log(error)
+          return res.json('Oops')
+      })
 
-// })
+})
+
+router.get('/associateEngagements', (req, res) => {
+
+  // let data = req.body
+  // let contactId = data.vid
+  let contactId = 101
+  console.log(contactId)
+  let promise = reassociateEngagements(contactId)
+  promise
+      .then(response =>{
+        return res.json('Done')  
+      })
+      .catch((error)=>{
+          console.log(error)
+          return res.json('Oops')
+      })
+
+})
 
 //use server to serve up routes
 app.use('/', router)
