@@ -140,30 +140,10 @@ router.get('/login', async (req, res) => {
 
 
 //get list of companies from Hubspot with relevant properties
+
 router.post('/associateEngagements', (req, res) => {
 
-  // let data = req.body
-  // let contactId = data.vid
-  let contactId = 101
-  console.log(contactId)
-  let promise = processEngagements(contactId)
-  promise
-      .then(response =>{
-        return res.json('Done')  
-      })
-      .catch((error)=>{
-          console.log(error)
-          return res.json('Oops')
-      })
-
-})
-
-router.get('/associateEngagements', (req, res) => {
-
-  // let data = req.body
-  // let contactId = data.vid
-  let contactId = 101
-  console.log(contactId)
+  let contactId = req.body.object.objectId
   let promise = reassociateEngagements(contactId)
   promise
       .then(response =>{
