@@ -158,7 +158,7 @@ router.post('/associateEngagements', (req, res) => {
 
 
 
-router.post('/match-primary-email', async (req, res) => {
+router.post('/matchPrimaryEmail', async (req, res) => {
 
   let contactId = req.body.object.objectId
   let promise = matchPrimaryEmail(contactId)
