@@ -7,7 +7,7 @@ const cors = require('cors')
 require('dotenv').config();
 
 
-const { reassociateEngagements, getSecondaryContactId } = require('./app.js')
+const { reassociateEngagements, getSecondaryContactId, matchPrimaryEmail } = require('./app.js')
 const { auth } = require('./classes/auth.js')
 const { Owner } = require('./classes/owner.js')
 const { Contact } = require('./classes/contact.js')
@@ -145,6 +145,23 @@ router.post('/associateEngagements', (req, res) => {
 
   let contactId = req.body.object.objectId
   let promise = reassociateEngagements(contactId)
+  promise
+      .then(response =>{
+        return res.json('Done')  
+      })
+      .catch((error)=>{
+          console.log(error)
+          return res.json('Oops')
+      })
+
+})
+
+
+
+router.post('/match-primary-email', async (req, res) => {
+
+  let contactId = req.body.object.objectId
+  let promise = matchPrimaryEmail(contactId)
   promise
       .then(response =>{
         return res.json('Done')  

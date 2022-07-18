@@ -2,6 +2,7 @@ const axios = require('axios')
 const { auth } = require('./classes/auth.js')
 const { Contact } = require('./classes/contact.js')
 const _ = require("lodash")
+const e = require('express')
 const base = 'https://api.hubapi.com'
 
 const delay = time => new Promise(res => setTimeout(res, time))
@@ -147,10 +148,10 @@ async function removeNonOwnerEngagements(type, engagementId, ownerId) { //type: 
 
 //this is the main task
 async function reassociateEngagements(contactId) {
-  
+
   let contact = new Contact()
   await contact.load(contactId)
-  if(contact.data.agent_private_contact != 'false'){
+  if (contact.data.agent_private_contact != 'false') {
     return false
   }
 
@@ -172,8 +173,8 @@ async function reassociateEngagements(contactId) {
     let secondaryContactId = await getSecondaryContactId(contactId, ownerId)
     for (let i = 0; i < engagements.length; i++) {
       //delete engagements on deals not belonging to the same engagement owner
-      await removeNonOwnerEngagements(engagements[i].type,engagements[i].id,ownerId)
-      
+      await removeNonOwnerEngagements(engagements[i].type, engagements[i].id, ownerId)
+
       //reassociation to my agent contact
       await updateAssociation(engagements[i].type, engagements[i].id, contactId, secondaryContactId)
 
@@ -181,5 +182,63 @@ async function reassociateEngagements(contactId) {
   }
 }
 
+async function matchPrimaryEmail(contactId) {
+
+  let contact = new Contact()
+  await contact.load(contactId)
+
+  if (!contact.data.primary_contact_id) {
+
+    let originalContact = await Contact.search('email', contact.data.primary_email)
+
+    if (originalContact == false) {
+      //original contact not found, create contact
+      originalContact = new Contact()
+      originalContact.data.email = contact.data.primary_email
+      originalContact.data.firstname = contact.data.firstname
+      originalContact.data.lastname = contact.data.lastname
+      originalContact.data.agent_private_contact = 'false'
+      await originalContact.save() //create
+    }
+    //update
+    originalContact.data.hubspot_owner_id = contact.data.hubspot_owner_id
+    await originalContact.save()
+
+    //update
+    contact.data.agent_private_contact = 'true'
+    contact.data.primary_contact_id = originalContact.data.hs_object_id
+    await contact.save()
+
+    //find and merge exising privat contacts with same owner
+    let filters = [
+      {
+        "propertyName": 'primary_contact_id',
+        "operator": 'EQ',
+        "value": contact.data.primary_contact_id
+      },
+      {
+        "propertyName": 'hubspot_owner_id',
+        "operator": 'EQ',
+        "value": contact.data.hubspot_owner_id
+      },
+      {
+        "propertyName": 'hs_object_id',
+        "operator": 'NEQ',
+        "value": contact.data.hs_object_id
+      }
+    ]
+    let otherPrivateContact = await Contact.searchComplex(filters)
+    if (otherPrivateContact != false) {
+      console.log('merge contact')
+      contact.merge(otherPrivateContact.data.hs_object_id)
+    }
+
+  }
+
+  // console.log(originalContact)
+}
+
 exports.reassociateEngagements = reassociateEngagements
 exports.getSecondaryContactId = getSecondaryContactId
+exports.matchPrimaryEmail = matchPrimaryEmail
+//KPak to do: set up work flow to remove primary_email if email is known
