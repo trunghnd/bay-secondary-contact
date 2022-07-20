@@ -2,17 +2,9 @@ const axios = require('axios')
 const { auth } = require('./auth.js')
 const base = 'https://api.hubapi.com'
 
+
+let ownersMax = 20
 let Contact = class {
-    // data: {
-    //     id: '163234306',
-    //     email: 'trung.ly@hypeanddexter.nz',
-    //     firstName: 'Trung',
-    //     lastName: 'Ly',
-    //     userId: 44128003,
-    //     createdAt: '2022-03-29T03:38:29.199Z',
-    //     updatedAt: '2022-06-29T07:52:38.105Z',
-    //     archived: false
-    // }
 
     essentialProps = [
         'firstname',
@@ -29,7 +21,9 @@ let Contact = class {
     data = {}
 
     constructor() {
-
+        for(let i=1; i<=ownersMax; i++){
+            this.essentialProps.push('owner_'+i)
+        }
     }
 
     async load(id) {
@@ -58,7 +52,11 @@ let Contact = class {
         let props = {}
         for (let i = 0; i < this.essentialProps.length; i++) {
             let prop = this.essentialProps[i]
-            props[prop] = this.data[prop]
+
+            if(prop in this.data){
+                props[prop] = this.data[prop]
+            }
+            
         }
 
         let res
@@ -102,6 +100,27 @@ let Contact = class {
             console.log(err)
             return false
         })
+
+    }
+    async addOwner(ownerId) {
+        let hasExisted = false
+        let availableIndex = 0
+        for(let i=1; i<=ownersMax; i++){
+
+            let id = this.data['owner_'+i]
+            if(id == ownerId.toString()){
+                hasExisted = true
+            }
+
+            if(id=='' && availableIndex==0){
+                availableIndex = i
+            }
+        }
+
+        if(!hasExisted && availableIndex>0){
+            this.data['owner_'+availableIndex] = ownerId
+        }
+        await this.save()
 
     }
 

@@ -201,8 +201,7 @@ async function matchPrimaryEmail(contactId) {
       await originalContact.save() //create
     }
     //update
-    originalContact.data.hubspot_owner_id = contact.data.hubspot_owner_id
-    await originalContact.save()
+    await originalContact.addOwner(contact.data.hubspot_owner_id)
 
     //update
     contact.data.agent_private_contact = 'true'

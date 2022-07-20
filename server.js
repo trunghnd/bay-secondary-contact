@@ -33,6 +33,15 @@ router.get('/testing', (req, res) => {
 
 })
 
+// router.get('/testingContact', async (req, res) => {
+//   let contact = new Contact()
+//   await contact.load(1851)
+//   await contact.addOwner("163230989")
+//   console.log(contact)
+//   res.json(contact.data)
+
+// })
+
 router.get('/card-view1', async (req, res) => {
   let query = req.query
   let owner = new Owner()
@@ -83,7 +92,6 @@ router.get('/card-data', async (req, res) => {
   await auth.authoriseRequest(req, '/card-data')
 
   let query = req.query
-  console.log(query)
   let contact = new Contact()
   await contact.load(query.hs_object_id)
   let data = {}
