@@ -91,16 +91,26 @@ router.get('/card-data', async (req, res) => {
     await owner.loadByUserId(query.userId)
     let privateContactId = await owner.getPrivateContact(query.hs_object_id)
     if (!privateContactId) {
-      data = {
-        "primaryAction": {
-          "type": "IFRAME",
-          "width": 600,
-          "height": 400,
-          "uri": `${serverUrl}/card-view1?userid=${query.userId}&contactid=${query.hs_object_id}&firstname=${encodeURIComponent(query.firstname)}&lastname=${encodeURIComponent(query.lastname)}&email=${encodeURIComponent(query.email)}&portalid=${query.portalId}`,
-          "label": "Create private view"
+      if (query.email) {
+        data = {
+          "primaryAction": {
+            "type": "IFRAME",
+            "width": 600,
+            "height": 400,
+            "uri": `${serverUrl}/card-view1?userid=${query.userId}&contactid=${query.hs_object_id}&firstname=${encodeURIComponent(query.firstname)}&lastname=${encodeURIComponent(query.lastname)}&email=${encodeURIComponent(query.email)}&portalid=${query.portalId}`,
+            "label": "Create private view"
+          }
+        }
+      } else {
+        data = {
+          "results": [
+            {
+              "objectId": 245,
+              "title": "Private views are not available"
+            }
+          ]
         }
       }
-
     } else {
       data = {
         "results": [
@@ -146,13 +156,13 @@ router.post('/associateEngagements', (req, res) => {
   let contactId = req.body.object.objectId
   let promise = reassociateEngagements(contactId)
   promise
-      .then(response =>{
-        return res.json('Done')  
-      })
-      .catch((error)=>{
-          console.log(error)
-          return res.json('Oops')
-      })
+    .then(response => {
+      return res.json('Done')
+    })
+    .catch((error) => {
+      console.log(error)
+      return res.json('Oops')
+    })
 
 })
 
@@ -163,13 +173,13 @@ router.post('/matchPrimaryEmail', async (req, res) => {
   let contactId = req.body.object.objectId
   let promise = matchPrimaryEmail(contactId)
   promise
-      .then(response =>{
-        return res.json('Done')  
-      })
-      .catch((error)=>{
-          console.log(error)
-          return res.json('Oops')
-      })
+    .then(response => {
+      return res.json('Done')
+    })
+    .catch((error) => {
+      console.log(error)
+      return res.json('Oops')
+    })
 
 })
 
