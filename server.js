@@ -7,7 +7,7 @@ const cors = require('cors')
 require('dotenv').config();
 
 
-const { reassociateEngagements, getSecondaryContactId, matchPrimaryEmail } = require('./app.js')
+const { reassociateEngagements, getSecondaryContactId, matchPrimaryEmail, processOwnershipRequest} = require('./app.js')
 const { auth } = require('./classes/auth.js')
 const { Owner } = require('./classes/owner.js')
 const { Contact } = require('./classes/contact.js')
@@ -33,14 +33,21 @@ router.get('/testing', (req, res) => {
 
 })
 
-// router.get('/testingContact', async (req, res) => {
-//   let contact = new Contact()
-//   await contact.load(1851)
-//   await contact.addOwner("163230989")
-//   console.log(contact)
-//   res.json(contact.data)
+// router.get('/testingObjects', async (req, res) => {
+//   // let contact = new Contact()
+//   // await contact.load(1851)
+//   // await contact.addOwner("163230989")
+//   // console.log(contact)
+//   // res.json(contact.data)
+
+//   let owner = new Owner()
+//   await owner.loadByEmail('trung.ly@hypeanddexter.nz')
+//   console.log(owner)
+//   res.json(owner)
 
 // })
+
+
 
 router.get('/card-view1', async (req, res) => {
   let query = req.query
@@ -192,6 +199,20 @@ router.post('/matchPrimaryEmail', async (req, res) => {
 
 })
 
+router.post('/requestOwnership', async (req, res) => {
+
+  let contactId = req.body.object.objectId
+  let promise = processOwnershipRequest(contactId)
+  promise
+    .then(response => {
+      return res.json('Done')
+    })
+    .catch((error) => {
+      console.log(error)
+      return res.json('Oops')
+    })
+
+})
 //use server to serve up routes
 app.use('/', router)
 

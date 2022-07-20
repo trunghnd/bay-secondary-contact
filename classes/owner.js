@@ -13,6 +13,7 @@ let Owner = class {
     //     updatedAt: '2022-06-29T07:52:38.105Z',
     //     archived: false
     // }
+    data = {}
     constructor() {
 
     }
@@ -23,6 +24,21 @@ let Owner = class {
         let res = await axios.get(urlOwnerIDs, config)
         this.data = res.data
     }
+
+    async loadByEmail(email) {
+        let config = await auth.getConfig()
+        let urlOwner = base + '/crm/v3/owners/?email=' + email +'&limit=100&archived=false'
+        let res = await axios.get(urlOwner, config)
+        if(res.data.results.length>0){
+            this.data = res.data.results[0]
+            return true
+        }else{
+            return false
+        }
+    
+    }
+
+    
     async getPrivateContact(originalContactId) {
         let config = await auth.getConfig()
 
@@ -47,11 +63,9 @@ let Owner = class {
             ]
         }
         let resSearch = await axios.post(urlSsearch, data, config)
-        console.log(resSearch.data)
+        // console.log(resSearch.data)
         if (resSearch.data.total == 0) { //create new secondary Contact for owner when not found
-
             return false
-
         } else {
             return resSearch.data.results[0].id
         }

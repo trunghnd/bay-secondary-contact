@@ -14,6 +14,7 @@ let Contact = class {
         'hubspot_owner_id',
         'primary_contact_id',
         'primary_email',
+        'ownership_requested_by'
     ]
     readonlyProps = [
         'hs_object_id',

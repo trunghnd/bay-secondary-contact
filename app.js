@@ -3,6 +3,7 @@ const { auth } = require('./classes/auth.js')
 const { Contact } = require('./classes/contact.js')
 const _ = require("lodash")
 const e = require('express')
+const { Owner } = require('./classes/owner.js')
 const base = 'https://api.hubapi.com'
 
 const delay = time => new Promise(res => setTimeout(res, time))
@@ -146,7 +147,6 @@ async function removeNonOwnerEngagements(type, engagementId, ownerId) { //type: 
 
 }
 
-//this is the main task
 async function reassociateEngagements(contactId) {
 
   let contact = new Contact()
@@ -237,7 +237,26 @@ async function matchPrimaryEmail(contactId) {
   // console.log(originalContact)
 }
 
+async function processOwnershipRequest(contactId) {
+
+  let contact = new Contact()
+  await contact.load(contactId)
+
+  let owner = new Owner()
+  let canLoad = await owner.loadByEmail(contact.data.ownership_requested_by)
+  if(canLoad){
+    await contact.addOwner(owner.data.id)
+    contact.data.ownership_requested_by = ''
+    await contact.save()
+  }
+
+
+}
+
 exports.reassociateEngagements = reassociateEngagements
 exports.getSecondaryContactId = getSecondaryContactId
 exports.matchPrimaryEmail = matchPrimaryEmail
+exports.processOwnershipRequest = processOwnershipRequest
 //KPak to do: set up work flow to remove primary_email if email is known
+//Kpak to do: modify work flow when adding contact with primary_email and no email
+//tell Kpak about owner_id
