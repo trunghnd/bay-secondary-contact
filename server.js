@@ -83,6 +83,7 @@ router.get('/card-data', async (req, res) => {
   await auth.authoriseRequest(req, '/card-data')
 
   let query = req.query
+  console.log(query)
   let contact = new Contact()
   await contact.load(query.hs_object_id)
   let data = {}
