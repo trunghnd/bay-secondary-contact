@@ -46,16 +46,16 @@ let Auth = class {
     }
 
     async getAccessToken() {
-        //check cache
-        // let accessToken = this.cache.get('token')
-        // if (accessToken == undefined) {
-        //     //set cache if not there
-        //     await this.updateAccessToken()
-        // }
+        // check cache
+        let accessToken = this.cache.get('token')
+        if (accessToken == undefined) {
+            //set cache if not there
+            await this.updateAccessToken()
+        }
 
-        //get from cache
-        // return this.cache.get('token')
-        return process.env.HS_PROD_KEY
+        // get from cache
+        return this.cache.get('token')
+        // return process.env.HS_PROD_KEY
     }
     setAccessToken(token) {
         return this.cache.set('token', token, 1700)
