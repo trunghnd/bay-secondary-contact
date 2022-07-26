@@ -11,6 +11,8 @@ const { reassociateEngagements, getSecondaryContactId, matchPrimaryEmail, proces
 const { auth } = require('./classes/auth.js')
 const { Owner } = require('./classes/owner.js')
 const { Contact } = require('./classes/contact.js')
+const { AOF } = require('./classes/aof.js')
+
 
 const serverUrl = process.env.SERVER_URL
 
@@ -22,7 +24,6 @@ app.use(bodyParser.json()) // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
 app.use(logger('dev'))
 app.set("view engine", "ejs");
-
 
 //setup routes
 var router = express.Router()
@@ -46,8 +47,6 @@ router.get('/testing', (req, res) => {
 //   res.json(owner)
 
 // })
-
-
 
 router.get('/card-view1', async (req, res) => {
   let query = req.query
@@ -95,7 +94,6 @@ router.get('/make-secondary-contact', (req, res) => {
 
 
 router.get('/card-data', async (req, res) => {
-
   await auth.authoriseRequest(req, '/card-data')
 
   let query = req.query
@@ -153,7 +151,6 @@ router.get('/card-data', async (req, res) => {
   res.json(data)
 })
 
-
 router.get('/login', async (req, res) => {
 
   let code = req.query.code
@@ -163,7 +160,6 @@ router.get('/login', async (req, res) => {
   res.json(cred)
 
 })
-
 
 //get list of companies from Hubspot with relevant properties
 
@@ -181,8 +177,6 @@ router.post('/associateEngagements', (req, res) => {
     })
 
 })
-
-
 
 router.post('/matchPrimaryEmail', async (req, res) => {
 
@@ -202,7 +196,7 @@ router.post('/matchPrimaryEmail', async (req, res) => {
 router.post('/requestOwnership', async (req, res) => {
 
   let contactId = req.body.object.objectId
-  let promise = processOwnershipRequest(contactId)
+  let promise = (contactId)
   promise
     .then(response => {
       return res.json('Done')
@@ -211,6 +205,26 @@ router.post('/requestOwnership', async (req, res) => {
       console.log(error)
       return res.json('Oops')
     })
+
+})
+
+
+router.post('/addContactSubscription', async (req, res) => {
+
+  try{
+    let contactId = req.body.object.objectId
+    let contact = new Contact()
+    await contact.load(contactId)
+    await contact.updateSubscription()
+  
+    res.send('Done')
+
+  }
+  catch(err){
+    console.log(err)
+    res.send('error')
+
+  }
 
 })
 //use server to serve up routes

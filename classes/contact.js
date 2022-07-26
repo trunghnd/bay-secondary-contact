@@ -1,9 +1,12 @@
 const axios = require('axios')
 const { auth } = require('./auth.js')
+const { AOF } = require('./aof.js')
+const { Owner } = require('./owner.js')
 const base = 'https://api.hubapi.com'
 
 
 let ownersMax = 20
+const associationTypeIdSubscribe = 186
 let Contact = class {
 
     essentialProps = [
@@ -22,8 +25,8 @@ let Contact = class {
     data = {}
 
     constructor() {
-        for(let i=1; i<=ownersMax; i++){
-            this.essentialProps.push('owner_'+i)
+        for (let i = 1; i <= ownersMax; i++) {
+            this.essentialProps.push('owner_' + i)
         }
     }
 
@@ -54,10 +57,10 @@ let Contact = class {
         for (let i = 0; i < this.essentialProps.length; i++) {
             let prop = this.essentialProps[i]
 
-            if(prop in this.data){
+            if (prop in this.data) {
                 props[prop] = this.data[prop]
             }
-            
+
         }
 
         let res
@@ -106,22 +109,74 @@ let Contact = class {
     async addOwner(ownerId) {
         let hasExisted = false
         let availableIndex = 0
-        for(let i=1; i<=ownersMax; i++){
+        for (let i = 1; i <= ownersMax; i++) {
 
-            let id = this.data['owner_'+i]
-            if(id == ownerId.toString()){
+            let id = this.data['owner_' + i]
+            if (id == ownerId.toString()) {
                 hasExisted = true
             }
 
-            if(id=='' && availableIndex==0){
+            if (id == '' && availableIndex == 0) {
                 availableIndex = i
             }
         }
 
-        if(!hasExisted && availableIndex>0){
-            this.data['owner_'+availableIndex] = ownerId
+        if (!hasExisted && availableIndex > 0) {
+            this.data['owner_' + availableIndex] = ownerId
         }
         await this.save()
+
+    }
+    async subscribe(aof) {
+
+        let config = await auth.getConfig()
+        let props = [
+            {
+                "associationCategory": "USER_DEFINED",
+                "associationTypeId": associationTypeIdSubscribe
+            }
+        ]
+        let url = base + '/crm/v4/objects/contacts/' + this.data.hs_object_id + '/associations/2-6107162/' + aof.data.hs_object_id
+        let res = axios.put(url, props, config)
+        return res.then(payload => {
+
+            console.log(payload.data)
+            return true
+        }).catch(err => {
+            console.log(err)
+            return false
+        })
+
+    }
+
+    async updateSubscription() {
+        let config = await auth.getConfig()
+
+        // let url = base + '/crm/v4/objects/contacts/' + this.data.hs_object_id + '/associations/2-6107162/'
+        // let res = await axios.get(url, config)
+        // let subscriptionAofIds = res.data.results.filter(el => {
+        //     let associationTypes = el.associationTypes.filter(element => element.typeId == associationTypeIdSubscribe)
+        //     return associationTypes.length > 0 ? true : false
+        // })
+        // .map(el => el.toObjectId)
+
+        for (let i = 1; i <= ownersMax; i++) {
+            let ownerId = this.data['owner_' + i]
+            if (ownerId) {
+                let owner = new Owner()
+                await owner.loadById(ownerId)
+    
+                let aof = await AOF.search('emailaddress',owner.data.email)
+                if(aof){
+                  let contact = new Contact()
+                  await this.subscribe(aof)
+                }
+
+            }
+
+        }
+
+        return 'done'
 
     }
 

@@ -257,6 +257,3 @@ exports.reassociateEngagements = reassociateEngagements
 exports.getSecondaryContactId = getSecondaryContactId
 exports.matchPrimaryEmail = matchPrimaryEmail
 exports.processOwnershipRequest = processOwnershipRequest
-//KPak to do: set up work flow to remove primary_email if email is known
-//Kpak to do: modify work flow when adding contact with primary_email and no email
-//tell Kpak about owner_id

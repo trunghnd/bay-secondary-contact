@@ -24,6 +24,12 @@ let Owner = class {
         let res = await axios.get(urlOwnerIDs, config)
         this.data = res.data
     }
+    async loadById(id) {
+        let config = await auth.getConfig()
+        let urlOwnerID = base + '/crm/v3/owners/' + id + '?idProperty=id'
+        let res = await axios.get(urlOwnerID, config)
+        this.data = res.data
+    }
 
     async loadByEmail(email) {
         let config = await auth.getConfig()
