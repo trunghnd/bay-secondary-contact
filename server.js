@@ -196,7 +196,7 @@ router.post('/matchPrimaryEmail', async (req, res) => {
 router.post('/requestOwnership', async (req, res) => {
 
   let contactId = req.body.object.objectId
-  let promise = (contactId)
+  let promise = processOwnershipRequest(contactId)
   promise
     .then(response => {
       return res.json('Done')
@@ -207,6 +207,8 @@ router.post('/requestOwnership', async (req, res) => {
     })
 
 })
+
+
 
 
 router.post('/addContactSubscription', async (req, res) => {
