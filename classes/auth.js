@@ -101,6 +101,22 @@ let Auth = class {
         return config
     }
 
+    // async authoriseRequest(request) {
+
+    //     // console.log(request.headers)
+    //     var httpURI = this.serverUrl + request.originalUrl;
+    //     let bodyString = ''
+    //     if(Object.keys(request.body).length > 0){
+    //         bodyString = JSON.stringify(request.body)
+    //     } 
+    //     let sourceString = this.clientSecret + request.method + httpURI + bodyString
+
+    //     let hash = crypto.createHash('sha256').update(sourceString).digest('hex')
+    //     let signature = request.headers['x-hubspot-signature']
+
+    //     return hash == signature
+    // }
+
     checkHubspotSignature(req, res, next) {
 
         let serverUrl = process.env.SERVER_URL

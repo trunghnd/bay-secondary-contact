@@ -116,8 +116,8 @@ router.get('/make-secondary-contact', (req, res) => {
 })
 
 
-router.get('/card-data', async (req, res) => {
-  await auth.authoriseRequest(req, '/card-data')
+router.get('/card-data', auth.checkHubspotSignature, async (req, res) => {
+  // await auth.authoriseRequest(req, '/card-data')
 
   let query = req.query
   let contact = new Contact()
