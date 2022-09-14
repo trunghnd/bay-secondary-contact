@@ -132,7 +132,8 @@ let Auth = class {
 
         let hash = crypto.createHash('sha256').update(sourceString).digest('hex')
         let signature = req.headers['x-hubspot-signature']
-
+        console.log(hash)
+        console.log(signature)
         console.log(mode + ' : ' + (hash == signature))
         if (mode == 'dev' || hash == signature) {
             next()
