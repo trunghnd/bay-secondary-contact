@@ -186,7 +186,7 @@ router.get('/login', async (req, res) => {
 
 //get list of companies from Hubspot with relevant properties
 
-router.post('/associateEngagements', auth.checkHubspotSignature, (req, res) => {
+router.post('/associateEngagements', auth.checkHubspotSignature, async (req, res) => {
 
   let contactId = req.body.object.objectId
   await reassociateEngagements(contactId)
