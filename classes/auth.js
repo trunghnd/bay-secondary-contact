@@ -101,20 +101,29 @@ let Auth = class {
         return config
     }
 
-    async authoriseRequest(request) {
+    checkHubspotSignature(req, res, next) {
 
-        // console.log(request.headers)
-        var httpURI = this.serverUrl + request.originalUrl;
+        let serverUrl = process.env.SERVER_URL
+        let clientSecret = process.env.HS_CLIENT_SECRET
+        let mode = process.env.MODE || 'dev'
+
+        var httpURI = serverUrl + req.originalUrl;
         let bodyString = ''
-        if(Object.keys(request.body).length > 0){
-            bodyString = JSON.stringify(request.body)
-        } 
-        let sourceString = this.clientSecret + request.method + httpURI + bodyString
+        if (Object.keys(req.body).length > 0) {
+            bodyString = JSON.stringify(req.body)
+        }
+        let sourceString = clientSecret + req.method + httpURI + bodyString
 
         let hash = crypto.createHash('sha256').update(sourceString).digest('hex')
-        let signature = request.headers['x-hubspot-signature']
+        let signature = req.headers['x-hubspot-signature']
 
-        return hash == signature
+        console.log(mode + ' : ' + (hash == signature))
+        if (mode == 'dev' || hash == signature) {
+            next()
+        } else {
+            res.status(401).send('401 Unauthorized HTTP responses')
+        }
+
     }
 }
 

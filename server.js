@@ -1,13 +1,15 @@
 //this is a Node Express server
 //bay-secondary-contact-4m6xe.ondigitalocean.app
 const express = require('express')
+const Sentry = require('@sentry/node');
+const Tracing = require("@sentry/tracing");
 const bodyParser = require('body-parser')
 const logger = require('morgan')
 const cors = require('cors')
 require('dotenv').config();
 
 
-const { reassociateEngagements, getSecondaryContactId, matchPrimaryEmail, processOwnershipRequest} = require('./app.js')
+const { reassociateEngagements, getSecondaryContactId, matchPrimaryEmail, processOwnershipRequest } = require('./app.js')
 const { auth } = require('./classes/auth.js')
 const { Owner } = require('./classes/owner.js')
 const { Contact } = require('./classes/contact.js')
@@ -18,6 +20,27 @@ const serverUrl = process.env.SERVER_URL
 
 //setup express server
 const app = express()
+
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  integrations: [
+    // enable HTTP calls tracing
+    new Sentry.Integrations.Http({ tracing: true }),
+    // enable Express.js middleware tracing
+    new Tracing.Integrations.Express({ app }),
+  ],
+
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
+});
+
+// RequestHandler creates a separate execution context using domains, so that every
+// transaction/span/breadcrumb is attached to its own Hub instance
+app.use(Sentry.Handlers.requestHandler());
+// TracingHandler creates a trace for every incoming request
+app.use(Sentry.Handlers.tracingHandler());
 
 app.use(cors())
 app.use(bodyParser.json()) // for parsing application/json
@@ -163,74 +186,52 @@ router.get('/login', async (req, res) => {
 
 //get list of companies from Hubspot with relevant properties
 
-router.post('/associateEngagements', (req, res) => {
+router.post('/associateEngagements', auth.checkHubspotSignature, (req, res) => {
 
   let contactId = req.body.object.objectId
-  let promise = reassociateEngagements(contactId)
-  promise
-    .then(response => {
-      return res.json('Done')
-    })
-    .catch((error) => {
-      console.log(error)
-      return res.json('Oops')
-    })
+  await reassociateEngagements(contactId)
+  res.json('Done')
+})
+
+router.post('/matchPrimaryEmail', auth.checkHubspotSignature, async (req, res) => {
+
+  let contactId = req.body.object.objectId
+  await matchPrimaryEmail(contactId)
+  res.json('Done')
 
 })
 
-router.post('/matchPrimaryEmail', async (req, res) => {
+router.post('/requestOwnership', auth.checkHubspotSignature, async (req, res) => {
 
   let contactId = req.body.object.objectId
-  let promise = matchPrimaryEmail(contactId)
-  promise
-    .then(response => {
-      return res.json('Done')
-    })
-    .catch((error) => {
-      console.log(error)
-      return res.json('Oops')
-    })
+  await processOwnershipRequest(contactId)
+  res.json('Done')
 
 })
 
-router.post('/requestOwnership', async (req, res) => {
+router.post('/addContactSubscription',auth.checkHubspotSignature, async (req, res) => {
 
   let contactId = req.body.object.objectId
-  let promise = processOwnershipRequest(contactId)
-  promise
-    .then(response => {
-      return res.json('Done')
-    })
-    .catch((error) => {
-      console.log(error)
-      return res.json('Oops')
-    })
+  let contact = new Contact()
+  await contact.load(contactId)
+  await contact.updateSubscription()
 
-})
-
-
-
-
-router.post('/addContactSubscription', async (req, res) => {
-
-  try{
-    let contactId = req.body.object.objectId
-    let contact = new Contact()
-    await contact.load(contactId)
-    await contact.updateSubscription()
-  
-    res.send('Done')
-
-  }
-  catch(err){
-    console.log(err)
-    res.send('error')
-
-  }
+  res.send('Done')
 
 })
 //use server to serve up routes
 app.use('/', router)
+
+// The error handler must be before any other error middleware and after all controllers
+app.use(Sentry.Handlers.errorHandler());
+
+// Optional fallthrough error handler
+app.use(function onError(err, req, res, next) {
+  // The error id is attached to `res.sentry` to be returned
+  // and optionally displayed to the user for support.
+  res.statusCode = 500;
+  res.end(res.sentry + "\n");
+});
 
 // launch our backend into a port
 const apiPort = 80;

@@ -168,8 +168,11 @@ async function reassociateEngagements(contactId) {
   for (const key in engagementsGrouped) {
 
     let ownerId = key
-    let engagements = engagementsGrouped[key]
 
+    // let owner = new Owner()
+    // await owner.loadById(ownerId)
+    // console.log(owner.data.teams)
+    let engagements = engagementsGrouped[key]
     let secondaryContactId = await getSecondaryContactId(contactId, ownerId)
     for (let i = 0; i < engagements.length; i++) {
       //delete engagements on deals not belonging to the same engagement owner
