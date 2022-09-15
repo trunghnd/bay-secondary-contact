@@ -1,8 +1,14 @@
 const axios = require('axios')
 const { auth } = require('./auth.js')
+require('dotenv').config();
 const base = 'https://api.hubapi.com'
+let portal = process.env.PORTAL || 'production'
+
 
 let objectName = '2-6107162'
+if(portal == 'sandbox'){
+    objectName = '2-8652219'
+}
 
 let AOF = class {
 

@@ -2,11 +2,21 @@ const axios = require('axios')
 const { auth } = require('./auth.js')
 const { AOF } = require('./aof.js')
 const { Owner } = require('./owner.js')
+require('dotenv').config();
 const base = 'https://api.hubapi.com'
+
+let portal = process.env.PORTAL || 'production'
 
 
 let ownersMax = 20
-const associationTypeIdSubscribe = 186
+let associationTypeIdSubscribe = 186
+let objectNameAof = '2-6107162'
+if(portal == 'sandbox'){
+    associationTypeIdSubscribe = 121
+    objectNameAof = '2-8652219'
+}
+
+
 let Contact = class {
 
     essentialProps = [
@@ -136,7 +146,7 @@ let Contact = class {
                 "associationTypeId": associationTypeIdSubscribe
             }
         ]
-        let url = base + '/crm/v4/objects/contacts/' + this.data.hs_object_id + '/associations/2-6107162/' + aof.data.hs_object_id
+        let url = base + '/crm/v4/objects/contacts/' + this.data.hs_object_id + '/associations/'+objectNameAof+'/' + aof.data.hs_object_id
         let res = axios.put(url, props, config)
         return res.then(payload => {
 
