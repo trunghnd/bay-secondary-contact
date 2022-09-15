@@ -107,6 +107,7 @@ let AOF = class {
 
 exports.AOF = AOF
 
+//production
 // let data = {
 //     "results": [
 //         {
@@ -116,13 +117,35 @@ exports.AOF = AOF
 //         },
 //         {
 //             "category": "USER_DEFINED",
-//             "typeId": 186,
-//             "label": "Subscribe"
+//             "typeId": 40,
+//             "label": null
 //         },
 //         {
 //             "category": "USER_DEFINED",
-//             "typeId": 40,
+//             "typeId": 186,
+//             "label": "Subscribed"
+//         }
+//     ]
+// }
+
+//sandbox
+
+// {
+//     "results": [
+//         {
+//             "category": "USER_DEFINED",
+//             "typeId": 62,
 //             "label": null
+//         },
+//         {
+//             "category": "USER_DEFINED",
+//             "typeId": 124,
+//             "label": "Unsubscribed"
+//         },
+//         {
+//             "category": "USER_DEFINED",
+//             "typeId": 122,
+//             "label": "Subscribed"
 //         }
 //     ]
 // }

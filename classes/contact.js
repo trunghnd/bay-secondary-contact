@@ -140,22 +140,41 @@ let Contact = class {
     async subscribe(aof) {
 
         let config = await auth.getConfig()
-        let props = [
-            {
-                "associationCategory": "USER_DEFINED",
-                "associationTypeId": associationTypeIdSubscribe
-            }
-        ]
-        let url = base + '/crm/v4/objects/contacts/' + this.data.hs_object_id + '/associations/'+objectNameAof+'/' + aof.data.hs_object_id
-        let res = axios.put(url, props, config)
-        return res.then(payload => {
+        let canSubscribe = true
 
-            console.log(payload.data)
-            return true
-        }).catch(err => {
-            console.log(err)
-            return false
-        })
+        //check if can subscribe
+        let url = base + '/crm/v4/objects/contacts/' + this.data.hs_object_id + '/associations/'+objectNameAof
+        let res = await axios.get(url,config)
+        let results = res.data.results
+        for(let i=0; i<results.length; i++){
+            let associations = results[i]
+            if(associations.toObjectId.toString() == aof.data.hs_object_id.toString()){
+                let associationTypes = associations.associationTypes
+                for(let j=0; j<associationTypes.length; j++){
+                    let associationType = associationTypes[j]
+                    if(associationType.label == 'Subscribed' || associationType.label == 'Unsubscribed'){
+                        canSubscribe = false
+                    }
+                }
+            }
+            
+        }
+        
+        console.log(aof.data.hs_object_id + '-' + canSubscribe)
+        
+        if(canSubscribe){
+            let props = [
+                {
+                    "associationCategory": "USER_DEFINED",
+                    "associationTypeId": associationTypeIdSubscribe
+                }
+            ]
+            let url = base + '/crm/v4/objects/contacts/' + this.data.hs_object_id + '/associations/'+objectNameAof+'/' + aof.data.hs_object_id
+            let res = await axios.put(url, props, config)
+
+        }
+        
+ 
 
     }
 
@@ -178,7 +197,6 @@ let Contact = class {
     
                 let aof = await AOF.search('emailaddress',owner.data.email)
                 if(aof){
-                  let contact = new Contact()
                   await this.subscribe(aof)
                 }
 
