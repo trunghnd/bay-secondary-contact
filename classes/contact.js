@@ -12,7 +12,7 @@ let ownersMax = 20
 let associationTypeIdSubscribe = 186
 let objectNameAof = '2-6107162'
 if(portal == 'sandbox'){
-    associationTypeIdSubscribe = 121
+    associationTypeIdSubscribe = 122
     objectNameAof = '2-8652219'
 }
 
