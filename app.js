@@ -192,28 +192,9 @@ async function matchPrimaryEmail(contactId) {
 
   if (!contact.data.primary_contact_id) {
 
-    let filtersOriginalContact = [
-      {
-        "filters": [
-          {
-            "value": contact.data.primary_email,
-            "propertyName": "hs_additional_emails",
-            "operator": "CONTAINS_TOKEN"
-          }
-        ]
-      },
-      {
-        "filters": [
-          {
-            "value": contact.data.primary_email,
-            "propertyName": "email",
-            "operator": "EQ"
-          }
-        ]
-      }
-    ]
+    
 
-    let originalContact = await Contact.searchComplex(filtersOriginalContact)
+    let originalContact = await Contact.searchAllEmails(contact.data.primary_email)
 
     if (originalContact == false) {
       //original contact not found, create contact

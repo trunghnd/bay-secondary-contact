@@ -236,6 +236,41 @@ let Contact = class {
 
 
     }
+    static async searchAllEmails(email) {
+        let config = await auth.getConfig()
+        let url = base + '/crm/v3/objects/contacts/search'
+        let data = {
+            "filterGroups": [
+                {
+                  "filters": [
+                    {
+                      "value": "bregmens@gmail.com",
+                      "propertyName": email,
+                      "operator": "CONTAINS_TOKEN"
+                    }
+                  ]
+                },
+                {
+                  "filters": [
+                    {
+                      "value": email,
+                      "propertyName": "email",
+                      "operator": "EQ"
+                    }
+                  ]
+                }
+              ]
+        }
+        let res = await axios.post(url, data, config)
+        if (res.data.total >= 1) {
+            let contactId = res.data.results[0]['id']
+            let contact = new Contact()
+            await contact.load(contactId)
+            return contact
+        } else {
+            return false
+        }
+    }
     static async searchComplex(filters) {
         let config = await auth.getConfig()
         let url = base + '/crm/v3/objects/contacts/search'
