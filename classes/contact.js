@@ -244,8 +244,8 @@ let Contact = class {
                 {
                   "filters": [
                     {
-                      "value": "bregmens@gmail.com",
-                      "propertyName": email,
+                      "value": email,
+                      "propertyName": "hs_additional_emails",
                       "operator": "CONTAINS_TOKEN"
                     }
                   ]
