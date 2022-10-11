@@ -192,7 +192,28 @@ async function matchPrimaryEmail(contactId) {
 
   if (!contact.data.primary_contact_id) {
 
-    let originalContact = await Contact.search('email', contact.data.primary_email)
+    let filtersOriginalContact = [
+      {
+        "filters": [
+          {
+            "value": contact.data.primary_email,
+            "propertyName": "hs_additional_emails",
+            "operator": "CONTAINS_TOKEN"
+          }
+        ]
+      },
+      {
+        "filters": [
+          {
+            "value": contact.data.primary_email,
+            "propertyName": "email",
+            "operator": "EQ"
+          }
+        ]
+      }
+    ]
+
+    let originalContact = await Contact.searchComplex(filtersOriginalContact)
 
     if (originalContact == false) {
       //original contact not found, create contact
@@ -247,7 +268,7 @@ async function processOwnershipRequest(contactId) {
 
   let owner = new Owner()
   let canLoad = await owner.loadByEmail(contact.data.ownership_requested_by)
-  if(canLoad){
+  if (canLoad) {
     await contact.addOwner(owner.data.id)
     contact.data.ownership_requested_by = ''
     await contact.save()
