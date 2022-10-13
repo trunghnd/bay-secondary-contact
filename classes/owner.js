@@ -20,31 +20,45 @@ let Owner = class {
 
     async loadByUserId(userId) {
         let config = await auth.getConfig()
-        let urlOwnerIDs = base + '/crm/v3/owners/' + userId + '?idProperty=userId'
-        let res = await axios.get(urlOwnerIDs, config)
-        this.data = res.data
+
+        try {
+            let urlOwnerIDs = base + '/crm/v3/owners/' + userId + '?idProperty=userId'
+            let res = await axios.get(urlOwnerIDs, config)
+            this.data = res.data
+            return true
+
+        } catch (err) {
+            return false
+        }
     }
     async loadById(id) {
         let config = await auth.getConfig()
-        let urlOwnerID = base + '/crm/v3/owners/' + id + '?idProperty=id'
-        let res = await axios.get(urlOwnerID, config)
-        this.data = res.data
+        try {
+            let urlOwnerID = base + '/crm/v3/owners/' + id + '?idProperty=id'
+            let res = await axios.get(urlOwnerID, config)
+            this.data = res.data
+            return true
+
+        } catch (err) {
+            return false
+        }
+
     }
 
     async loadByEmail(email) {
         let config = await auth.getConfig()
-        let urlOwner = base + '/crm/v3/owners/?email=' + email +'&limit=100&archived=false'
+        let urlOwner = base + '/crm/v3/owners/?email=' + email + '&limit=100&archived=false'
         let res = await axios.get(urlOwner, config)
-        if(res.data.results.length>0){
+        if (res.data.results.length > 0) {
             this.data = res.data.results[0]
             return true
-        }else{
+        } else {
             return false
         }
-    
+
     }
 
-    
+
     async getPrivateContact(originalContactId) {
         let config = await auth.getConfig()
 

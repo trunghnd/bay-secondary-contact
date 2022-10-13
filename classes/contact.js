@@ -193,11 +193,13 @@ let Contact = class {
             let ownerId = this.data['owner_' + i]
             if (ownerId) {
                 let owner = new Owner()
-                await owner.loadById(ownerId)
-    
-                let aof = await AOF.search('emailaddress',owner.data.email)
-                if(aof){
-                  await this.subscribe(aof)
+                let canLoad = await owner.loadById(ownerId)
+                
+                if(canLoad){
+                    let aof = await AOF.search('emailaddress',owner.data.email)
+                    if(aof){
+                      await this.subscribe(aof)
+                    }
                 }
 
             }
